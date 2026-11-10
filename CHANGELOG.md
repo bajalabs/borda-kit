@@ -4,6 +4,12 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-10
+
+### Security
+
+- `sharp` 0.35.5 (librsvg CVE-2026-96889), `zod` 4.6.6 (memory exhaustion on oversized constrained input), `satori` 0.33.5 (improper escaping in generated SVG).
+
 ## [1.0.0] - 2026-11-10
 
 ### Added

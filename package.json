@@ -1,11 +1,14 @@
 {
   "name": "borda-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "A link-in-bio boards template: a brand's contact cards at boards.<domain>/<slug>, built with Astro from local content files into a static site.",
   "license": "MIT",
   "author": "Baja Labs",
-  "repository": { "type": "git", "url": "git+https://github.com/bajalabs/borda-kit.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bajalabs/borda-kit.git"
+  },
   "type": "module",
   "scripts": {
     "content": "node scripts/borda-load.mjs",
@@ -25,10 +28,10 @@
     "@astrojs/sitemap": "3.7.4",
     "@resvg/resvg-js": "2.6.2",
     "astro": "7.3.8",
-    "satori": "0.29.0",
-    "sharp": "0.35.4",
+    "satori": "0.33.5",
+    "sharp": "0.35.5",
     "uqr": "0.1.3",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
@@ -39,6 +42,8 @@
     "typescript": "5.9.3",
     "vitest": "5.1.0"
   },
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "packageManager": "pnpm@10.26.0"
 }
