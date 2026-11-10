@@ -1,0 +1,82 @@
+---
+/**
+ * Board pages for every site (the primary at /<slug>, others at /<lang>/<slug>), the thank-you pages, the secondary
+ * indexes, and (with BORDA_REDIRECTS=html, the default) one small page per redirect that any static host can serve.
+ */
+import type { GetStaticPaths } from "astro";
+import BoardLayout from "../../layouts/BoardLayout.astro";
+import BoardCard from "../../components/BoardCard.astro";
+import LeadForm from "../../components/LeadForm.astro";
+import BoardList from "../../components/BoardList.astro";
+import { dict } from "../../i18n/index.ts";
+import { bundles, entries, href, origin, prefixOf, primary, redirectMode, thankYouPath } from "../../borda/bundle.ts";
+import { isExternal, servedRedirects } from "../../borda/redirects.ts";
+import type { Bundle, Board } from "../../borda/schema.ts";
+type Props =
+  | { kind: "board"; bundle: Bundle; board: Board; path: string }
+  | { kind: "thanks"; bundle: Bundle; path: string }
+  | { kind: "index"; bundle: Bundle; path: string }
+  | { kind: "redirect"; bundle: Bundle; path: string; to: string };
+export const getStaticPaths = (() => {
+  const out: { params: { path: string }; props: Props }[] = [];
+  for (const e of entries) out.push({ params: { path: e.path.slice(1) }, props: { kind: "board", bundle: e.bundle, board: e.board, path: e.path } });
+  for (const b of bundles) {
+    const thanks = thankYouPath(b); out.push({ params: { path: thanks.slice(1) }, props: { kind: "thanks", bundle: b, path: thanks } });
+    if (b !== primary) out.push({ params: { path: prefixOf(b).slice(1) }, props: { kind: "index", bundle: b, path: prefixOf(b) } });
+    if (redirectMode === "html") for (const r of servedRedirects(b)) out.push({ params: { path: r.from.slice(1) }, props: { kind: "redirect", bundle: b, path: r.from, to: isExternal(r.to) ? r.to : `${origin}${r.to}` } });
+  }
+  return out;
+}) satisfies GetStaticPaths;
+const props = Astro.props as Props;
+const t = dict(props.bundle.site.locale);
+const canonical = `${origin}${props.path}`;
+const theme = props.kind === "board" && props.board.theme !== "default" ? props.board.theme : (props.bundle.site.theme === "default" ? undefined : props.bundle.site.theme);
+const home = href(prefixOf(props.bundle) || "/");
+---
+{props.kind === "board" && (
+  <BoardLayout t={t} title={`${props.board.full_name}${props.board.title ? ` · ${props.board.title}` : ""} · ${props.bundle.site.name}`} description={props.board.tagline ?? props.board.title ?? props.bundle.site.name} canonical={canonical} ogImage={`${canonical}/og.jpg`} theme={theme} accent={props.board.accent} siteName={props.bundle.site.name} noindex={props.board.status === "coming_soon"}>
+    <BoardCard bundle={props.bundle} board={props.board} t={t} path={props.path} />
+    <LeadForm bundle={props.bundle} board={props.board} t={t} path={props.path} />
+    <p class="mt-6 text-center text-sm opacity-80"><a href={home}>{t.allBoards}</a> · <a href={props.bundle.site.website_url}>{props.bundle.site.domain}</a></p>
+  </BoardLayout>
+)}
+{props.kind === "thanks" && (
+  <BoardLayout t={t} title={`${t.thankYouTitle} · ${props.bundle.site.name}`} canonical={canonical} theme={theme} siteName={props.bundle.site.name} noindex={true}>
+    <section class="card rounded-3xl p-6 text-center shadow-xl">
+      <h1 class="text-title font-semibold" id="thanks-title">{t.thankYouTitle}</h1>
+      <p class="muted mt-2" id="thanks-body">{t.thankYouBody}</p>
+      <p class="mt-2 hidden text-sm font-medium" id="thanks-number"></p>
+      <p class="muted mt-2 hidden text-sm" id="thanks-error">{t.formError}</p>
+      <a href={home} class="btn mt-6">{t.back}</a>
+    </section>
+    <script type="application/json" id="thanks-i18n" set:html={JSON.stringify({ errorTitle: t.errorTitle, errors: t.errors, number: t.thankYouNumber })}></script>
+    <script is:inline>
+      (function () {
+        var q = new URLSearchParams(location.search); var i18n = JSON.parse(document.getElementById('thanks-i18n').textContent || '{}');
+        if (q.has('error')) {
+          document.getElementById('thanks-title').textContent = i18n.errorTitle || document.getElementById('thanks-title').textContent;
+          document.getElementById('thanks-body').hidden = true;
+          var err = document.getElementById('thanks-error'); var code = q.get('code'); if (code && i18n.errors && i18n.errors[code]) err.textContent = i18n.errors[code]; err.classList.remove('hidden');
+        } else if (q.get('n')) { var n = document.getElementById('thanks-number'); n.textContent = (i18n.number || '{n}').replace('{n}', q.get('n')); n.classList.remove('hidden'); }
+      })();
+    </script>
+  </BoardLayout>
+)}
+{props.kind === "index" && (
+  <BoardLayout t={t} title={`${t.allBoards} · ${props.bundle.site.name}`} canonical={canonical} theme={theme} siteName={props.bundle.site.name}>
+    <h1 class="text-title font-semibold">{props.bundle.site.name} · {t.allBoards}</h1>
+    <BoardList list={entries.filter((e) => e.bundle === props.bundle)} />
+  </BoardLayout>
+)}
+{props.kind === "redirect" && (
+  <html lang={t.htmlLang}>
+    <head>
+      <meta charset="utf-8" />
+      <title>{props.to}</title>
+      <meta http-equiv="refresh" content={`0;url=${props.to}`} />
+      <meta name="robots" content="noindex" />
+      <link rel="canonical" href={props.to} />
+    </head>
+    <body><a href={props.to}>{props.to}</a></body>
+  </html>
+)}

@@ -1,0 +1,14 @@
+---
+/** The primary site's index: every published board as a card link. */
+import BoardLayout from "../layouts/BoardLayout.astro";
+import BoardList from "../components/BoardList.astro";
+import { dict } from "../i18n/index.ts";
+import { entries, origin, primary } from "../borda/bundle.ts";
+const t = dict(primary.site.locale);
+const list = entries.filter((e) => e.bundle === primary);
+---
+<BoardLayout t={t} title={`${t.allBoards} · ${primary.site.name}`} description={primary.site.name} canonical={`${origin}/`} siteName={primary.site.name} theme={primary.site.theme === "default" ? undefined : primary.site.theme}>
+  <h1 class="text-title font-semibold">{primary.site.name} · {t.allBoards}</h1>
+  <BoardList list={list} />
+  <p class="mt-8 text-center text-sm opacity-80"><a href={primary.site.website_url}>{primary.site.domain}</a></p>
+</BoardLayout>

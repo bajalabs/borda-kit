@@ -1,0 +1,25 @@
+---
+/** A site's boards as card links: the thumbnail (responsive, with its focal point) or the initials, the name and the role line. */
+import { href, type Entry } from "../borda/bundle.ts";
+import { photoOf } from "../borda/media.ts";
+import { initials } from "../borda/vcard.ts";
+import Portrait from "./Portrait.astro";
+interface Props { list: Entry[] }
+const { list } = Astro.props;
+---
+<ul class="mt-stack-4 grid gap-3">
+  {list.map(({ board, path }) => {
+    const photo = photoOf(board);
+    const alt = `${board.full_name}${board.title ? `, ${board.title}` : ""}`;
+    return (
+      <li><a href={href(path)} class="card flex items-center gap-4 rounded-2xl p-4 shadow-lg">
+        {photo ? (
+          <Portrait photo={photo} px={56} alt={alt} class="size-14 shrink-0 rounded-full object-cover" />
+        ) : (
+          <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-semibold text-[var(--on-accent)]" aria-hidden="true">{initials(board.full_name)}</span>
+        )}
+        <span><span class="block font-semibold">{board.full_name}</span>{board.title && <span class="muted block text-sm">{board.title}</span>}</span>
+      </a></li>
+    );
+  })}
+</ul>

@@ -1,0 +1,13 @@
+/* Brand tokens: replace these with your brand's (OKLCH). The names are what src/styles/global.css and the themes read. */
+@theme {
+  --font-sans: "InterVariable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-brand: oklch(0.38 0.08 262);        /* the brand's main colour: the navy theme's band and accent */
+  --color-brand-soft: oklch(0.95 0.02 262);
+  --color-brand-deep: oklch(0.24 0.06 262);   /* the navy theme's page background */
+  --color-base-50: oklch(0.985 0.002 262);
+  --color-base-100: oklch(0.967 0.004 262);
+  --color-base-200: oklch(0.922 0.005 262);
+  --color-base-500: oklch(0.556 0.008 262);
+  --color-base-700: oklch(0.372 0.009 262);
+  --color-base-900: oklch(0.210 0.010 262);
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../schema/board.schema.json",
+  "full_name": "Alex Rivera",
+  "title": "Creative Director",
+  "tagline": "Brand systems for small teams that ship.",
+  "credentials": ["Demo card", "Fictional person"],
+  "bio_md": "Alex leads **identity and packaging** at Example Studio.\n\n- Brand systems\n- Packaging\n- Workshops\n\nSee the [portfolio](https://example.com/portfolio).",
+  "email": "alex@example.com",
+  "phone_e164": "+13125550142",
+  "whatsapp_e164": "+13125550142",
+  "linkedin_url": "https://example.com/in/alex-rivera",
+  "photo": { "src": "media/alex-rivera.jpg", "alt": "Generated placeholder portrait (demo)", "focal": { "x": 0.52, "y": 0.4 } },
+  "hours": "Mon–Fri, 9:00–17:00 CT",
+  "links": [
+    { "label": "Portfolio", "href": "https://example.com/portfolio" },
+    { "label": "Studio newsletter", "href": "https://example.com/newsletter" }
+  ],
+  "ctas": [{ "label": "Book a 20-minute call", "href": "https://example.com/book/alex" }],
+  "socials": [
+    { "network": "instagram", "url": "https://example.com/social/instagram" },
+    { "network": "youtube", "url": "https://example.com/social/youtube" },
+    { "network": "website", "url": "https://example.com" }
+  ],
+  "status": "published",
+  "sort": 1
+}

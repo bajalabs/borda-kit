@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.borda/
+.vercel/
+.netlify/
+.wrangler/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/

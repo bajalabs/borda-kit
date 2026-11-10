@@ -1,0 +1,36 @@
+---
+/** Document shell for a board site: head metadata, the brand's self-hosted fonts (src/brand), the theme on <html>. */
+import "../styles/global.css";
+import { brand } from "../brand/index.ts";
+import { href, noindex as siteNoindex } from "../borda/bundle.ts";
+import type { Dict } from "../i18n/index.ts";
+interface Props { t: Dict; title: string; description?: string | null; canonical: string; ogImage?: string; theme?: string; accent?: string | null; noindex?: boolean; siteName: string }
+const { t, title, description, canonical, ogImage, theme = brand.theme, accent, noindex = false, siteName } = Astro.props;
+const format = (url: string) => (url.endsWith(".woff2") ? "woff2" : url.endsWith(".woff") ? "woff" : "truetype");
+const fontCss = brand.fonts.map((f) => `@font-face{font-family:"${f.family}";font-style:${f.style};font-weight:${f.weight};font-display:swap;src:url("${href(f.url)}") format("${format(f.url)}")}`).join("");
+---
+<!doctype html>
+<html lang={t.htmlLang} data-theme={theme} style={accent ? `--accent:${accent}` : undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex || siteNoindex ? "noindex, follow" : "index, follow"} />
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content={t.ogLocale} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={href(brand.favicon)} type="image/svg+xml" />
+    {brand.fonts.map((f) => <link rel="preload" as="font" type={`font/${format(f.url) === "truetype" ? "ttf" : format(f.url)}`} href={href(f.url)} crossorigin />)}
+    <style is:inline set:html={fontCss}></style>
+  </head>
+  <body class="min-h-dvh">
+    <main id="main" class="mx-auto w-full max-w-md px-4 pb-16 pt-6 sm:pt-10"><slot /></main>
+  </body>
+</html>

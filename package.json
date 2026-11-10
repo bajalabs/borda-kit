@@ -1,0 +1,44 @@
+{
+  "name": "borda-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A link-in-bio boards template: a brand's contact cards at boards.<domain>/<slug>, built with Astro from local content files into a static site.",
+  "license": "MIT",
+  "author": "Baja Labs",
+  "repository": { "type": "git", "url": "git+https://github.com/bajalabs/borda-kit.git" },
+  "type": "module",
+  "scripts": {
+    "content": "node scripts/borda-load.mjs",
+    "dev": "node scripts/borda-load.mjs && astro dev --port ${PORT:-4335}",
+    "build": "node scripts/borda-load.mjs && node scripts/gates/content.mjs && astro check && astro build && node scripts/gates/dist.mjs && node scripts/gates/redirects.mjs",
+    "preview": "astro preview --port ${PORT:-4335}",
+    "lint": "biome lint .",
+    "type-check": "node scripts/borda-load.mjs && astro check",
+    "test": "vitest run --maxWorkers=2",
+    "schema": "node scripts/schema.mjs",
+    "gates:content": "node scripts/gates/content.mjs",
+    "gates:dist": "node scripts/gates/dist.mjs",
+    "gates:redirects": "node scripts/gates/redirects.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
+    "@resvg/resvg-js": "2.6.2",
+    "astro": "7.3.8",
+    "satori": "0.29.0",
+    "sharp": "0.35.4",
+    "uqr": "0.1.3",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@biomejs/biome": "2.6.6",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "24.13.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  },
+  "engines": { "node": ">=24" },
+  "packageManager": "pnpm@10.26.0"
+}

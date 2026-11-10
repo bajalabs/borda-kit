@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../schema/board.schema.json",
+  "full_name": "Alex Rivera",
+  "title": "Director creativo",
+  "tagline": "Sistemas de marca para equipos pequeños.",
+  "credentials": ["Tarjeta de demostración", "Persona ficticia"],
+  "bio_md": "Alex dirige **identidad y empaque** en Example Studio.\n\n- Sistemas de marca\n- Empaque\n- Talleres\n\nVea el [portafolio](https://example.com/es/portafolio).",
+  "email": "alex@example.com",
+  "phone_e164": "+13125550142",
+  "whatsapp_e164": "+13125550142",
+  "linkedin_url": "https://example.com/in/alex-rivera",
+  "photo": { "src": "media/alex-rivera.jpg", "alt": "Retrato de muestra generado (demostración)", "focal": { "x": 0.52, "y": 0.4 } },
+  "hours": "Lun–Vie, 9:00–17:00 (hora del centro de EE. UU.)",
+  "links": [
+    { "label": "Portafolio", "href": "https://example.com/es/portafolio" },
+    { "label": "Boletín del estudio", "href": "https://example.com/es/boletin" }
+  ],
+  "ctas": [{ "label": "Agende una llamada de 20 minutos", "href": "https://example.com/book/alex" }],
+  "socials": [
+    { "network": "instagram", "url": "https://example.com/social/instagram" },
+    { "network": "youtube", "url": "https://example.com/social/youtube" },
+    { "network": "sitio", "url": "https://example.com/es" }
+  ],
+  "status": "published",
+  "sort": 1
+}

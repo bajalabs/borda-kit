@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schema/board.schema.json",
+  "full_name": "Mina Castillo",
+  "title": "Studio Manager",
+  "tagline": "Scheduling, invoices and visits.",
+  "email": "hello@example.com",
+  "phone_e164": "+13125550190",
+  "hours": "Mon–Thu, 10:00–16:00 CT",
+  "theme": "sand",
+  "status": "published",
+  "sort": 3
+}

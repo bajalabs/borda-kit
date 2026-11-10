@@ -1,0 +1,9 @@
+---
+import BoardLayout from "../layouts/BoardLayout.astro";
+import { dict } from "../i18n/index.ts";
+import { href, origin, primary } from "../borda/bundle.ts";
+const t = dict(primary.site.locale);
+---
+<BoardLayout t={t} title={`404 · ${primary.site.name}`} canonical={`${origin}/404`} siteName={primary.site.name} noindex={true}>
+  <section class="card rounded-3xl p-6 text-center shadow-xl"><h1 class="text-title font-semibold">404</h1><p class="muted mt-2">{t.notFound}</p><a href={href("/")} class="btn mt-6">{t.allBoards}</a></section>
+</BoardLayout>

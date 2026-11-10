@@ -1,0 +1,100 @@
+---
+/**
+ * The lead form, when the site sets `form.action`: a plain HTML post with the board's slug, a honeypot and the consent.
+ * The endpoint answers 303 to the thank-you page (`?n=<reference>` or `?error=1&code=<code>`), so it works without JavaScript.
+ * With JavaScript the same post goes as fetch with Accept: application/json and the answer renders on the card
+ * (`{ "ok": true, "number": "…" }` or `{ "error": { "code": "…" } }`); when the request itself fails, the plain post takes over.
+ * A Cloudflare Turnstile challenge is added when the site sets `form.turnstile_site_key`; it loads on the first interaction.
+ */
+import type { Bundle, Board } from "../borda/schema.ts";
+import type { Dict } from "../i18n/index.ts";
+import { href } from "../borda/bundle.ts";
+import { consentParts } from "../borda/consent.ts";
+interface Props { bundle: Bundle; board: Board; t: Dict; path: string }
+const { bundle, board, t, path } = Astro.props;
+const form = bundle.site.form;
+const siteKey = form?.turnstile_site_key ?? null;
+const copy = { number: t.thankYouNumber, formError: t.formError, errors: t.errors };
+// The consent links the site's privacy notice when the site names one; otherwise it is plain text.
+const privacyUrl = bundle.site.privacy_url ?? null;
+const consent = consentParts(t.consent, t.privacyNotice, privacyUrl);
+---
+{form && (
+  <section class="card mt-stack-3 rounded-3xl p-gutter shadow-xl" aria-labelledby="lead-title">
+    <h2 id="lead-title" class="text-title font-semibold">{t.contact}</h2>
+    <div class="mt-stack-2" hidden tabindex="-1" role="status" data-lead-done>
+      <p class="font-semibold">{t.thankYouTitle}</p>
+      <p class="muted mt-stack-1 text-sm">{t.thankYouBody}</p>
+      <p class="mt-stack-1 text-sm font-medium" hidden data-lead-number></p>
+    </div>
+    <p class="mt-stack-2 rounded-xl bg-[var(--accent)]/10 px-3 py-2 text-sm" hidden role="alert" data-lead-error></p>
+    <form method="post" action={form.action} class="mt-3 grid gap-3">
+      <input type="hidden" name="board" value={board.slug} />
+      <input type="hidden" name="site" value={bundle.key} />
+      <input type="hidden" name="locale" value={bundle.site.locale} />
+      <input type="hidden" name="page" value={href(path)} />
+      {form.consent_version && <input type="hidden" name="consent_version" value={form.consent_version} />}
+      <div class="hidden" aria-hidden="true"><label>Website <input type="text" name="_hp" tabindex="-1" autocomplete="off" /></label></div>
+      <label class="grid gap-1 text-sm"><span class="muted">{t.name}</span><input class="rounded-xl border border-current/15 bg-transparent px-3 py-2" name="name" autocomplete="name" maxlength="120" /></label>
+      <label class="grid gap-1 text-sm"><span class="muted">{t.emailLabel}</span><input class="rounded-xl border border-current/15 bg-transparent px-3 py-2" type="email" name="email" required autocomplete="email" maxlength="254" /></label>
+      <label class="grid gap-1 text-sm"><span class="muted">{t.phoneLabel}</span><input class="rounded-xl border border-current/15 bg-transparent px-3 py-2" type="tel" name="phone" autocomplete="tel" maxlength="30" /></label>
+      <label class="grid gap-1 text-sm"><span class="muted">{t.message}</span><textarea class="rounded-xl border border-current/15 bg-transparent px-3 py-2" name="message" rows="3" maxlength="2000"></textarea></label>
+      <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="consent" value="on" required class="mt-1" /><span class="muted">{consent.before}{consent.link && privacyUrl && <a class="underline" href={privacyUrl} target="_blank" rel="noopener">{consent.link}</a>}{consent.after}</span></label>
+      {siteKey && <div class="cf-turnstile" data-sitekey={siteKey} data-size="flexible" data-lazy="1"></div>}
+      <button class="btn" type="submit" data-sending={t.sending}>{t.send}</button>
+    </form>
+    <script type="application/json" data-lead-copy set:html={JSON.stringify(copy)}></script>
+    <script is:inline>
+      // Progressive enhancement: with fetch, the answer renders in place; without it (or when the request fails) the form posts as HTML.
+      // With a Turnstile widget, the script loads on the first interaction with the form (or 1.5 s after it scrolls into view),
+      // and a submit without a token waits for one instead of posting an empty cf-turnstile-response.
+      (function () {
+        var section = document.currentScript.closest('section'); var form = section.querySelector('form');
+        var el = form.querySelector('.cf-turnstile[data-lazy]');
+        var copy = JSON.parse(section.querySelector('[data-lead-copy]').textContent || '{}');
+        var done = section.querySelector('[data-lead-done]'), number = section.querySelector('[data-lead-number]'), error = section.querySelector('[data-lead-error]');
+        var button = form.querySelector('button[type=submit]'); var label = button ? button.textContent : ''; var loaded = false, widget, pending = false;
+        function busy(on) { if (!button) return; button.disabled = on; button.textContent = on ? (button.getAttribute('data-sending') || label) : label; }
+        function token() { if (!el) return 'none'; try { return widget !== undefined && window.turnstile && window.turnstile.getResponse(widget); } catch (e) { return ''; } }
+        function load() {
+          if (!el || loaded) return; loaded = true;
+          window.onTurnstileReady = function () {
+            widget = window.turnstile.render(el, { sitekey: el.getAttribute('data-sitekey'), size: 'flexible',
+              callback: function () { if (pending) { pending = false; busy(false); form.requestSubmit ? form.requestSubmit() : form.submit(); } },
+              'error-callback': function () { pending = false; busy(false); }, 'expired-callback': function () { if (window.turnstile && widget !== undefined) window.turnstile.reset(widget); } });
+          };
+          var s = document.createElement('script'); s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileReady&render=explicit'; s.async = true; s.defer = true; document.head.appendChild(s);
+        }
+        function fail(code) {
+          error.textContent = (code && copy.errors && copy.errors[code]) || copy.formError || ''; error.hidden = false; busy(false);
+          try { if (widget !== undefined && window.turnstile) window.turnstile.reset(widget); } catch (e) {}
+        }
+        function send() {
+          busy(true); error.hidden = true;
+          var body = new URLSearchParams(); new FormData(form).forEach(function (v, k) { body.append(k, v); });
+          fetch(form.action, { method: 'POST', headers: { accept: 'application/json' }, body: body })
+            .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, body: j }; }, function () { return { ok: res.ok, body: {} }; }); })
+            .then(function (r) {
+              if (r.ok && r.body && r.body.ok) {
+                form.hidden = true;
+                if (r.body.number) { number.textContent = (copy.number || '{n}').replace('{n}', r.body.number); number.hidden = false; }
+                done.hidden = false; busy(false); try { done.focus({ preventScroll: true }); } catch (e) {}
+                return;
+              }
+              fail(r.body && r.body.error && r.body.error.code);
+            })
+            .catch(function () { form.submit(); });
+        }
+        if (el) {
+          ['focusin', 'pointerdown', 'touchstart', 'keydown'].forEach(function (ev) { form.addEventListener(ev, load, { once: true, passive: true }); });
+          if ('IntersectionObserver' in window) { var io = new IntersectionObserver(function (es) { if (es.some(function (x) { return x.isIntersecting; })) { setTimeout(load, 1500); io.disconnect(); } }); io.observe(form); }
+        }
+        form.addEventListener('submit', function (e) {
+          if (!token()) { e.preventDefault(); pending = true; busy(true); load(); return; }
+          if (!window.fetch || !window.URLSearchParams || !window.FormData) return;
+          e.preventDefault(); send();
+        });
+      })();
+    </script>
+  </section>
+)}

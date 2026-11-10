@@ -1,0 +1,97 @@
+---
+/** The card: band with the brand mark, photo or initials, name, role line, tagline, actions, links, socials, hours, vCard and QR. */
+import Icon from "./Icon.astro";
+import Portrait from "./Portrait.astro";
+import type { Bundle, Board } from "../borda/schema.ts";
+import type { Dict } from "../i18n/index.ts";
+import { href, origin } from "../borda/bundle.ts";
+import { photoOf } from "../borda/media.ts";
+import { socialIcon, socialLabel } from "../borda/socials.ts";
+import { renderMarkdown } from "../borda/markdown.ts";
+import { brand } from "../brand/index.ts";
+import { formatPhone, initials, telHref, whatsappHref } from "../borda/vcard.ts";
+interface Props { bundle: Bundle; board: Board; t: Dict; path: string }
+const { bundle, board, t, path } = Astro.props;
+const photo = photoOf(board);
+type Action = { href: string; label: string; icon: "phone" | "chat" | "mail" | "briefcase"; external?: boolean };
+const actions: Action[] = [];
+if (board.phone_e164) actions.push({ href: telHref(board.phone_e164), label: t.call, icon: "phone" });
+if (board.whatsapp_e164) actions.push({ href: whatsappHref(board.whatsapp_e164), label: t.whatsapp, icon: "chat", external: true });
+if (board.email) actions.push({ href: `mailto:${board.email}`, label: t.email, icon: "mail" });
+if (board.linkedin_url) actions.push({ href: board.linkedin_url, label: t.linkedin, icon: "briefcase", external: true });
+const cols = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4"][actions.length] ?? "grid-cols-4";
+---
+<article class="card overflow-hidden rounded-3xl shadow-2xl">
+  <div class="band relative h-28 px-gutter pt-5">
+    <img src={href(brand.markWhite)} alt="" aria-hidden="true" class="h-8 w-auto opacity-95" decoding="async" />
+  </div>
+  <div class="relative -mt-14 flex flex-col items-center px-gutter text-center">
+    {photo ? (
+      <Portrait photo={photo} px={112} alt={photo.alt ?? board.full_name} priority class="size-28 rounded-full object-cover ring-4 ring-[var(--card)] shadow-lg" />
+    ) : (
+      <div class="flex size-28 items-center justify-center rounded-full bg-[var(--accent)] text-4xl font-semibold tracking-wide text-[var(--on-accent)] ring-4 ring-[var(--card)] shadow-lg" aria-hidden="true">{initials(board.full_name)}</div>
+    )}
+    <h1 class="mt-stack-3 text-display font-semibold">{board.full_name}</h1>
+    {board.title && <p class="muted mt-stack-1 text-base">{board.title}</p>}
+    {board.tagline && <p class="mt-stack-2 text-lead text-balance">{board.tagline}</p>}
+    <p class="mt-stack-2 text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">{bundle.site.name}</p>
+    {board.status === "coming_soon" && <p class="mt-stack-2 rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">{t.comingSoon}</p>}
+  </div>
+  {(actions.length > 0 || board.ctas.length > 0) && (
+    <div class="reveal">
+      {actions.length > 0 && (
+        <nav aria-label={t.contact} class="mt-stack-4 px-gutter">
+          <ul class:list={["grid gap-2.5", cols]}>
+            {actions.map((a) => (<li><a href={a.href} rel={a.external ? "noopener" : undefined} target={a.external ? "_blank" : undefined} class="btn-ghost btn w-full flex-col gap-1 py-3 text-xs"><Icon name={a.icon} /><span>{a.label}</span></a></li>))}
+          </ul>
+        </nav>
+      )}
+      {board.ctas.length > 0 && (
+        <div class="mt-stack-2 grid gap-2 px-gutter">{board.ctas.map((c) => (<a href={c.href} class="btn" rel={/^https?:/.test(c.href) ? "noopener" : undefined}>{c.label}</a>))}</div>
+      )}
+    </div>
+  )}
+  {board.bio_md && <div class="bio muted mt-stack-3 px-gutter text-sm leading-relaxed" set:html={renderMarkdown(board.bio_md)} />}
+  {board.credentials.length > 0 && (
+    <ul class="mt-stack-3 flex flex-wrap justify-center gap-2 px-gutter" aria-label={t.credentials}>{board.credentials.map((c) => (<li class="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-medium">{c}</li>))}</ul>
+  )}
+  {board.links.length > 0 && (
+    <section class="mt-stack-4 px-gutter" aria-label={t.links}>
+      <ul class="grid gap-2">{board.links.map((l) => (<li><a href={l.href} class="link-card" rel={/^https?:/.test(l.href) ? "noopener" : undefined}><span class="flex items-center gap-2"><Icon name="link" class="size-4" />{l.label}</span><Icon name="arrow" class="size-4 opacity-60" /></a></li>))}</ul>
+    </section>
+  )}
+  {board.socials.length > 0 && (
+    <ul class="mt-stack-3 flex flex-wrap justify-center gap-2 px-gutter" aria-label={t.socials}>{board.socials.map((s) => { const label = socialLabel(s.network, s.url, s.label); return (<li><a href={s.url} rel="noopener" target="_blank" class="btn-ghost inline-flex size-11 items-center justify-center rounded-full" title={label}><Icon name={socialIcon(s.network, s.url)} class="size-5" /><span class="sr-only">{label}</span></a></li>); })}</ul>
+  )}
+  {board.hours && <p class="muted mt-stack-3 flex items-center justify-center gap-2 px-gutter text-sm"><Icon name="clock" class="size-4" />{board.hours}</p>}
+  <dl class="muted mt-stack-4 grid gap-2 border-t border-current/10 px-gutter py-5 text-sm">
+    {board.phone_e164 && (<div class="flex justify-between gap-3"><dt>{t.phoneLabel}</dt><dd><a href={telHref(board.phone_e164)}>{formatPhone(board.phone_e164)}</a></dd></div>)}
+    {board.email && (<div class="flex justify-between gap-3"><dt>{t.emailLabel}</dt><dd><a href={`mailto:${board.email}`}>{board.email}</a></dd></div>)}
+    <div class="flex justify-between gap-3"><dt>{t.website}</dt><dd><a href={bundle.site.website_url} rel="noopener">{bundle.site.domain}</a></dd></div>
+  </dl>
+  <div class="grid gap-3 px-gutter pb-6">
+    <div class="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-3">
+      {board.email && <a href={href(`${path}/contact.vcf`)} download="contact.vcf" class="btn whitespace-nowrap"><Icon name="save" /><span class="whitespace-nowrap">{t.saveContact}</span></a>}
+      <a href={href(`${path}/qr.svg`)} class="btn-ghost btn shrink-0" title={t.scanToSave}><img src={href(`${path}/qr.svg`)} alt={t.scanToSave} width="40" height="40" class="size-10 rounded bg-white p-0.5" loading="lazy" /></a>
+    </div>
+    <button type="button" class="btn-ghost btn w-full" hidden data-share data-title={`${board.full_name} · ${bundle.site.name}`} data-text={board.tagline ?? board.title ?? bundle.site.name} data-url={`${origin}${path}`} data-copied={t.linkCopied}><Icon name="share" class="size-4" /><span data-share-label>{t.share}</span></button>
+    <p class="text-center text-xs"><a href={href(`${path}/qr.png`)} download={`${board.slug}-qr.png`} class="muted underline underline-offset-4">{t.downloadQr}</a></p>
+    <p class="sr-only" aria-live="polite" data-share-live></p>
+  </div>
+  <script is:inline>
+    // Share: the Web Share sheet where the browser has one, else the link to the clipboard with the button saying so for two seconds.
+    // Without JavaScript (or either API) the button stays hidden.
+    (function () {
+      var root = document.currentScript.previousElementSibling, b = root.querySelector('[data-share]'); if (!b) return;
+      var canShare = typeof navigator.share === 'function', canCopy = !!(navigator.clipboard && navigator.clipboard.writeText); if (!canShare && !canCopy) return;
+      var label = b.querySelector('[data-share-label]'), live = root.querySelector('[data-share-live]'), text = label.textContent, timer;
+      b.hidden = false;
+      function said(msg) { label.textContent = msg; live.textContent = msg; clearTimeout(timer); timer = setTimeout(function () { label.textContent = text; live.textContent = ''; }, 2200); }
+      b.addEventListener('click', function () {
+        var data = { title: b.getAttribute('data-title'), text: b.getAttribute('data-text'), url: b.getAttribute('data-url') };
+        if (canShare) { navigator.share(data).catch(function () {}); return; }
+        navigator.clipboard.writeText(data.url).then(function () { said(b.getAttribute('data-copied')); }, function () {});
+      });
+    })();
+  </script>
+</article>

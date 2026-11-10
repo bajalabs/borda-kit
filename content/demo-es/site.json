@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schema/site.schema.json",
+  "demo": true,
+  "locale": "es-MX",
+  "name": "Example Studio",
+  "domain": "example.com",
+  "boards_domain": "boards.example.com",
+  "website_url": "https://example.com/es",
+  "theme": "default",
+  "privacy_url": "https://example.com/es/privacidad",
+  "form": { "action": "https://example.com/forms/card" },
+  "redirects": [{ "from": "/alex", "to": "/alex-rivera", "status": 301 }]
+}

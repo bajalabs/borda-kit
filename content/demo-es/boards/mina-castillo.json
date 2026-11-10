@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schema/board.schema.json",
+  "full_name": "Mina Castillo",
+  "title": "Gerente del estudio",
+  "tagline": "Agenda, facturas y visitas.",
+  "email": "hello@example.com",
+  "phone_e164": "+13125550190",
+  "hours": "Lun–Jue, 10:00–16:00 (hora del centro de EE. UU.)",
+  "theme": "sand",
+  "status": "published",
+  "sort": 3
+}

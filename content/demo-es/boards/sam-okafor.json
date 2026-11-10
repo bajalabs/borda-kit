@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schema/board.schema.json",
+  "full_name": "Sam Okafor",
+  "title": "Director de alianzas",
+  "tagline": "Alianzas con tiendas y mayoristas.",
+  "bio_md": "Sam atiende a los *socios comerciales* del estudio y las nuevas colaboraciones.",
+  "email": "sam@example.com",
+  "phone_e164": "+13125550177",
+  "linkedin_url": "https://example.com/in/sam-okafor",
+  "photo": { "src": "media/sam-okafor.jpg", "alt": "Retrato de muestra generado (demostración)", "focal": { "x": 0.48, "y": 0.4 } },
+  "theme": "forest",
+  "links": [{ "label": "Programa de socios", "href": "https://example.com/es/socios" }],
+  "status": "published",
+  "sort": 2
+}

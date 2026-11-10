@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schema/board.schema.json",
+  "full_name": "Sam Okafor",
+  "title": "Head of Partnerships",
+  "tagline": "Retail and wholesale partnerships.",
+  "bio_md": "Sam looks after the studio's *retail partners* and new collaborations.",
+  "email": "sam@example.com",
+  "phone_e164": "+13125550177",
+  "linkedin_url": "https://example.com/in/sam-okafor",
+  "photo": { "src": "media/sam-okafor.jpg", "alt": "Generated placeholder portrait (demo)", "focal": { "x": 0.48, "y": 0.4 } },
+  "theme": "forest",
+  "links": [{ "label": "Partner programme", "href": "https://example.com/partners" }],
+  "status": "published",
+  "sort": 2
+}

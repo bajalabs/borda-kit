@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "The JSON Schema this file follows (for editors).",
+      "type": "string"
+    },
+    "id": {
+      "description": "A stable id for the vCard UID; the card's URL is used when left out.",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "full_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "description": "The role line under the name.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tagline": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "credentials": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "bio_md": {
+      "description": "Markdown: paragraphs, **bold**, *italic*, links and lists.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email": {
+      "description": "Required for a published board: the vCard carries it.",
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "email",
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "phone_e164": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\+[1-9][0-9]{6,14}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "whatsapp_e164": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\+[1-9][0-9]{6,14}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "linkedin_url": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "photo": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "src": {
+              "type": "string",
+              "minLength": 1,
+              "description": "A file under content/ (for example media/alex-rivera.jpg) or an https URL."
+            },
+            "alt": {
+              "description": "Alternative text; the board's name when left out.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "focal": {
+              "description": "The point to keep in view when the photo is cropped, from 0 to 1 on each axis.",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "width": {
+              "description": "Remote photos only: the pixel width.",
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "height": {
+              "description": "Remote photos only: the pixel height.",
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "credit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "src"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "theme": {
+      "default": "default",
+      "description": "One of the themes in src/styles/global.css; default uses the site's.",
+      "type": "string",
+      "enum": [
+        "default",
+        "navy",
+        "charcoal",
+        "sand",
+        "forest",
+        "ink"
+      ]
+    },
+    "accent": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(#[0-9a-fA-F]{3,8}|(rgb|rgba|hsl|hsla|oklch|oklab)\\([0-9.,%\\s/+-]+\\))$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "hours": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "links": {
+      "default": [],
+      "description": "Link cards under the bio.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "href": {
+            "type": "string",
+            "pattern": "^(https?:\\/\\/|mailto:|tel:|\\/(?!\\/))"
+          }
+        },
+        "required": [
+          "label",
+          "href"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ctas": {
+      "default": [],
+      "description": "Full-width buttons under the contact actions.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "href": {
+            "type": "string",
+            "pattern": "^(https?:\\/\\/|mailto:|tel:|\\/(?!\\/))"
+          }
+        },
+        "required": [
+          "label",
+          "href"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "socials": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "network": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "network",
+          "url"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "org": {
+      "description": "The vCard ORG; the site's name when left out.",
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "default": "published",
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "coming_soon"
+      ]
+    },
+    "sort": {
+      "default": 0,
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "full_name"
+  ],
+  "additionalProperties": false,
+  "$id": "https://raw.githubusercontent.com/bajalabs/borda-kit/main/schema/board.schema.json",
+  "title": "borda-kit board (content/<site>/boards/<slug>.json)"
+}

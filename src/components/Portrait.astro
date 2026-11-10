@@ -1,0 +1,22 @@
+---
+/**
+ * A board's photo in a square of `px` CSS pixels: width variants at 1×, 2× and 3×, the focal point as object-position.
+ * A file under content/ is imported and optimised by Astro; a remote photo needs its host in image.domains, and without
+ * known dimensions it is fetched once and cut to a 3× square.
+ */
+import { Image } from "astro:assets";
+import type { Photo } from "../borda/media.ts";
+import { photoAttrs } from "../borda/photo.ts";
+interface Props { photo: Photo; px: number; alt: string; class: string; priority?: boolean }
+const { photo, px, alt, class: cls, priority = false } = Astro.props;
+const shot = photoAttrs(photo, px);
+const style = shot.position ? `object-position:${shot.position}` : undefined;
+const loading = priority ? undefined : ("lazy" as const);
+---
+{typeof photo.src !== "string" ? (
+  <Image src={photo.src} alt={alt} width={shot.width} height={shot.height} widths={shot.widths} sizes={shot.sizes} priority={priority} loading={loading} class={cls} style={style} />
+) : shot.known ? (
+  <Image src={photo.src} alt={alt} width={shot.width} height={shot.height} widths={shot.widths} sizes={shot.sizes} priority={priority} loading={loading} class={cls} style={style} />
+) : (
+  <Image src={photo.src} alt={alt} width={px * 3} height={px * 3} fit="cover" priority={priority} loading={loading} class={cls} />
+)}

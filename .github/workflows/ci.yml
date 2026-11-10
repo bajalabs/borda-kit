@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, type check, tests, builds, Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm type-check
+      - run: pnpm test
+      - name: Build the demo (redirects as pages)
+        run: pnpm build
+
+      # Mobile Lighthouse on the demo's index and first card, three runs each: the step fails when the median
+      # performance is under 95 or any run's accessibility is under 100.
+      - name: Lighthouse floor (mobile; performance >= 95, accessibility 100)
+        run: |
+          pnpm dlx serve@14.2.6 --no-port-switching -L -l tcp://127.0.0.1:4400 dist > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for i in $(seq 1 60); do curl -fsS -o /dev/null http://127.0.0.1:4400/ && break; sleep 1; done
+          fail=0
+          for p in / /alex-rivera; do
+            for r in 1 2 3; do
+              pnpm dlx lighthouse@13.5.0 "http://127.0.0.1:4400$p" --quiet \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage" \
+                --output=json --output-path="$RUNNER_TEMP/lh-$r.json"
+              jq -r --arg p "$p" --arg r "$r" '"\($p) run \($r): perf=\(.categories.performance.score*100|round) a11y=\(.categories.accessibility.score*100|round) best=\(.categories["best-practices"].score*100|round) lcp=\(.audits["largest-contentful-paint"].numericValue/1000*100|round/100)s"' "$RUNNER_TEMP/lh-$r.json"
+            done
+            median=$(jq -s '[.[].categories.performance.score] | sort | .[1]' "$RUNNER_TEMP"/lh-[123].json)
+            a11y=$(jq -s 'all(.[]; .categories.accessibility.score == 1)' "$RUNNER_TEMP"/lh-[123].json)
+            echo "$p median performance $(jq -n "$median * 100 | round"); accessibility 100 on every run: $a11y"
+            jq -n -e "$median >= 0.95 and $a11y" > /dev/null || fail=1
+          done
+          exit $fail
+
+      - name: Build with a base path and a _redirects file
+        run: pnpm build
+        env:
+          BORDA_SITE_URL: https://example.github.io/borda-kit
+          BORDA_REDIRECTS: file
