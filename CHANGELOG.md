@@ -8,7 +8,7 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ### Security
 
-- `sharp` 0.35.5 (librsvg CVE-2026-96889), `zod` 4.6.6 (memory exhaustion on oversized constrained input), `satori` 0.33.5 (improper escaping in generated SVG).
+- `sharp` 0.35.5 (librsvg CVE-2026-96889), `zod` 4.6.6 (memory exhaustion on oversized constrained input), `satori` 0.33.5 (improper escaping in generated SVG), and an override to `fflate` 0.7.5, which satori pins at 0.7.3.
 
 ## [1.0.0] - 2026-11-10
 

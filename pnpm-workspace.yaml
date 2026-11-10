@@ -1,3 +1,6 @@
 packages:
   - "."
 dedupePeerDependents: true
+overrides:
+  # satori 0.33.5 pins fflate 0.7.3; 0.7.5 fixes GHSA moderate advisory (same minor, no API change).
+  fflate: 0.7.5
